@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { SettingsProp, ContentProp, DataProp } from "./../types/index";
-import { MarkdownView, Notice, requestUrl } from "obsidian";
+import { MarkdownView, Notice, requestUrl} from "obsidian";
+import {findAndUploadImages} from "./publishImage";
 import { sign } from "jsonwebtoken";
 
 const matter = require("gray-matter");
@@ -36,18 +37,23 @@ export const publishPost = async (
 	});
 
 	// get frontmatter
-	const noteFile = view.app.workspace.getActiveFile();
-	const metaMatter = app.metadataCache.getFileCache(noteFile).frontmatter;
-	const data = matter(view.getViewData());
+	const noteFile = await findAndUploadImages(settings, view, token);
+	const noteContent = await app.vault.read(noteFile)
+	// console.log(noteContent)
+	let data = matter(noteContent);
+	const metaMatter = data.data;
+	// console.log(data)
 
-	const frontmatter = {
+	let frontmatter = {
 		title: metaMatter?.title || view.file.basename,
 		tags: metaMatter?.tags || [],
 		featured: metaMatter?.featured || false,
 		status: metaMatter?.published ? "published" : "draft",
-		excerpt: metaMatter?.excerpt || undefined,
+		custom_excerpt: metaMatter?.excerpt || "undefined",
 		feature_image: metaMatter?.feature_image || undefined,
+		slug: metaMatter?.slug || view.file.basename
 	};
+	console.log(frontmatter)
 	try{
 	const result = await requestUrl({
 		url: `${settings.url}/ghost/api/${version}/admin/posts/?source=html`,
