@@ -1,11 +1,13 @@
 export interface SettingsProp {
 	url: string;
 	adminToken: string;
+	debug: boolean
 }
 
 export const DEFAULT_SETTINGS: SettingsProp = {
 	url: "",
 	adminToken: "",
+	debug: false
 };
 
 export interface ContentProp {

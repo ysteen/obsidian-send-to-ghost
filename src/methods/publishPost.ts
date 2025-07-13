@@ -37,6 +37,7 @@ export const publishPost = async (
 
 	// get frontmatter
 	const noteFile = view.app.workspace.getActiveFile();
+	// @ts-ignore
 	const metaMatter = app.metadataCache.getFileCache(noteFile).frontmatter;
 	const data = matter(view.getViewData());
 
@@ -49,6 +50,10 @@ export const publishPost = async (
 		feature_image: metaMatter?.feature_image || undefined,
 	};
 	try{
+	const post = JSON.stringify(contentPost(frontmatter, data))
+	if (settings.debug == true) {
+		console.log("Request: " + post)
+	}
 	const result = await requestUrl({
 		url: `${settings.url}/ghost/api/${version}/admin/posts/?source=html`,
 		method: "POST",
@@ -58,10 +63,14 @@ export const publishPost = async (
 			"Content-Type": "application/json;charset=utf-8",
 			Authorization: `Ghost ${token}`,
 		},
-		body: JSON.stringify(contentPost(frontmatter, data)),
+		body: post
 	})
 
 	const json = result.json;
+	
+	if (settings.debug == true) {
+		console.log(JSON.stringify(json))
+	}
 
 	if (json?.posts) {
 		new Notice(
