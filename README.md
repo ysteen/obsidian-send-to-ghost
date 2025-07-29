@@ -15,6 +15,8 @@ To get your Staff Access Token, go to the admin dashboard and click the avatar i
 ### Using the plugin
 After installing the plugin in Obsidian, go to its settings and fill in the fields. Put the URL of your Ghost site in the "Site URL" field (or the `ghost.io` URL if you're using Ghost Pro), and your Staff Access Token/Admin API Key in the "Access Token" field. You can now click the ghost icon in the ribbon menu on the left or use the "Send to Ghost" command in the command palette to send the currently open note to Ghost.
 
+**If your note isn't being published correctly and you're using the Ghost Pro starter plan, please see [this comment](https://github.com/Southpaw1496/obsidian-send-to-ghost/issues/6#issuecomment-3079441691). If you're not using the Ghost Pro starter plan, please leave a comment on [Issue #6](https://github.com/Southpaw1496/obsidian-send-to-ghost/issues/6)**.
+
 ### Front Matter format
 
 Send to Ghost uses front matter to set Ghost-specific settings such as the title, tags, and the featured image. You can add front matter by enclosing it in `---` at the beginning of a note.
