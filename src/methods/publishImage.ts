@@ -11,20 +11,20 @@ import {SettingsProp} from './../types/index';
  */
 export async function findAndUploadImages(settings: SettingsProp, view: MarkdownView, token: string): Promise<TFile | undefined> {
     if (!settings.url || !settings.adminToken) {
-        new Notice("Ghost URL 또는 Admin API Key가 설정되지 않았습니다. 플러그인 설정을 확인해주세요.");
+        new Notice("Ghost URL or Admin API Key is not set. Please check your plugin settings.");
         return;
     }
 
-    // 1. 현재 에디터의 전체 내용을 문자열 변수로 가져옵니다.
+    // 1. Get all the content of current editor in string.
     let noteContent = view.editor.getValue();
     noteContent = removeBlockquotePrefixes(noteContent);
     
-    // 2. 노트 내용에서 `![[...]]` 형식의 로컬 이미지 링크를 모두 찾습니다.
+    // 2. Find all the `![[...]]` form of local image link in note.
     const imageLinkRegex = /!\[\[([^\]]+\.(?:png|jpg|jpeg|gif|bmp|svg))\]\]/g;
     const matches = [...noteContent.matchAll(imageLinkRegex)];
 
     if (matches.length > 0) {
-        // 3. Frontmatter 영역의 끝 위치를 미리 계산하여 이미지의 위치를 구분합니다.
+        // 3. Check the Frontmatter end to distinguish the image.
         let frontmatterEndIndex = -1;
         if (noteContent.startsWith('---')) {
             const secondDelimiterIndex = noteContent.indexOf('---', 3); 
@@ -33,9 +33,9 @@ export async function findAndUploadImages(settings: SettingsProp, view: Markdown
             }
         }
         
-        new Notice(`총 ${matches.length}개의 이미지를 Ghost에 업로드합니다...`);
+        new Notice(`Upload ${matches.length} images to Ghost...`);
 
-        // 4. 찾은 모든 이미지에 대해 반복 작업을 수행합니다.
+        // 4. repeat for all images in note.
         for (const match of matches) {
             const matchStartIndex = match.index as number;
             const localImageMarkdown = match[0]; // `![[image.png]]` 전체
@@ -60,7 +60,7 @@ export async function findAndUploadImages(settings: SettingsProp, view: Markdown
             }
         }
     } else {
-        new Notice("노트에서 업로드할 이미지를 찾지 못했습니다.");
+        new Notice("Cannot find images from notes.");
     }
 
     // 7. 최종적으로 가공된 내용으로 임시 파일을 생성하거나 업데이트합니다.
@@ -100,12 +100,12 @@ function removeBlockquotePrefixes(noteContent:string) {
  */
 async function processImage(settings: SettingsProp, imageFile: TFile, token:string): Promise<string | null> {
     try {
-        new Notice(`'${imageFile.name}' 업로드 중...`);
+        new Notice(`'${imageFile.name}' Uploading...`);
 
-        // 1. Ghost 인증을 위한 JWT 생성
+        // 1.  JWT generation for Ghost authentication
         const apiUrl = `${settings.url}/ghost/api/admin/images/upload/`;
 
-        // 2. 이미지 데이터를 ArrayBuffer로 읽기
+        // 2. read image data as ArrayBuffer
         const imageData: ArrayBuffer = await this.app.vault.readBinary(imageFile);
         const formData = new FormData();
         const imageBlob = new Blob([imageData], { type: `image/${imageFile.extension}` });
@@ -123,13 +123,13 @@ async function processImage(settings: SettingsProp, imageFile: TFile, token:stri
 				})
         const data = await response.json();
         const uploadedUrl = data.images[0].url
-        console.log(`✅ '${imageFile.name}' 업로드 성공! URL: ${uploadedUrl}`);
-        new Notice(`✅ '${imageFile.name}' 업로드 성공!. URL: ${uploadedUrl}`);
+        console.log(`✅ '${imageFile.name}' Upload successful! URL: ${uploadedUrl}`);
+        new Notice(`✅ '${imageFile.name}' Upload successful!. URL: ${uploadedUrl}`);
         return uploadedUrl
         
     } catch (error) {
-        console.error(`Ghost 업로드 실패 (${imageFile.name}):`, error);
-        new Notice(`❌ '${imageFile.name}' 업로드 실패. 개발자 콘솔을 확인하세요.`, 5000);
+        console.error(`Ghost upload failed! (${imageFile.name}):`, error);
+        new Notice(`❌ '${imageFile.name}' Upload failed! Check developer consoles.`, 5000);
         return null;
     }
 }
