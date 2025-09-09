@@ -51,5 +51,17 @@ export class SettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					})
 			);
+			new Setting(containerEl)
+				.setName("Debug Mode")
+				.setDesc("Print additional information to the console about the requests the plugin sends and receives. Useful for finding the cause of bugs.")
+				.addToggle((toggle) => {
+					toggle
+						.setValue(this.plugin.settings.debug)
+						.onChange(async (value) => {
+							this.plugin.settings.debug = value
+							await this.plugin.saveSettings()
+						})
+				})
+
 	}
 }

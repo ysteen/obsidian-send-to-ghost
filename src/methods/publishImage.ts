@@ -41,7 +41,7 @@ export async function findAndUploadImages(settings: SettingsProp, view: Markdown
             const localImageMarkdown = match[0]; // `![[image.png]]` 전체
             const imageName = match[1];          // `image.png` 부분
 
-            const imageFile = app.metadataCache.getFirstLinkpathDest(imageName, view.file.path) as TFile;
+            const imageFile = this.app.metadataCache.getFirstLinkpathDest(imageName, view.file.path) as TFile;
 
             if (imageFile) {
                 const uploadedUrl = await processImage(settings, imageFile, token);
@@ -65,14 +65,14 @@ export async function findAndUploadImages(settings: SettingsProp, view: Markdown
 
     // 7. 최종적으로 가공된 내용으로 임시 파일을 생성하거나 업데이트합니다.
     const tempFilePath = 'ghost-upload-preview.md';
-    let tempFile = app.vault.getAbstractFileByPath(tempFilePath);
+    let tempFile = this.app.vault.getAbstractFileByPath(tempFilePath);
 
     if (tempFile instanceof TFile) {
         // 임시 파일이 이미 존재하면 내용을 덮어씁니다.
-        await app.vault.modify(tempFile, noteContent);
+        await this.app.vault.modify(tempFile, noteContent);
     } else {
         // 임시 파일이 없으면 새로 생성합니다.
-        tempFile = await app.vault.create(tempFilePath, noteContent);
+        tempFile = await this.app.vault.create(tempFilePath, noteContent);
     }
 
     // 8. 생성되거나 수정된 임시 파일의 TFile 객체를 반환합니다.
@@ -106,7 +106,7 @@ async function processImage(settings: SettingsProp, imageFile: TFile, token:stri
         const apiUrl = `${settings.url}/ghost/api/admin/images/upload/`;
 
         // 2. 이미지 데이터를 ArrayBuffer로 읽기
-        const imageData: ArrayBuffer = await app.vault.readBinary(imageFile);
+        const imageData: ArrayBuffer = await this.app.vault.readBinary(imageFile);
         const formData = new FormData();
         const imageBlob = new Blob([imageData], { type: `image/${imageFile.extension}` });
 
